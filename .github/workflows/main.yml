@@ -14,7 +14,7 @@ jobs:
       NTRIP_PASSWORD: ${{ secrets.NTRIP_PASSWORD }}
       # IMPORTANT: Replace these with the actual URL and size of your tools
       SWIFT_TOOLS_URL: "https://path.to.your/swift-tools.tar.gz"
-      EXPECTED_FILE_SIZE: 12345678 # Replace with actual file size in bytes
+      EXPECTED_FILE_SIZE: 10702553 # Replace with actual file size in bytes
 
     steps:
       # Step A: Get repository code
