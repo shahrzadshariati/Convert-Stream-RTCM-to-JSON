@@ -40,7 +40,7 @@ jobs:
 
       - name: Run a 10-second Test Stream
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
           echo "### Starting a 10-second test stream... ###"
           # Add the -vv flag for "very verbose" output
