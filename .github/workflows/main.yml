@@ -38,19 +38,42 @@ jobs:
           echo "$HOME/swift-tools" >> $GITHUB_PATH
           echo "Tools are ready."
 
-      - name: Run a 10-second Test Stream
+      - name: Run a 10-second Test Stream with Debugging
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
-          echo "### Starting a 10-second test stream... ###"
-          # Add the -vv flag for "very verbose" output
-          timeout 10s swift ntripping -vv \
+          echo "[1/4] Starting debug checks..."
+          set -o pipefail
+
+          echo "[2/4] Verifying we can write to the output file..."
+          touch log.rtcm.json.test
+          if [ $? -ne 0 ]; then
+            echo "Error: Could not create the output file. Check directory permissions."
+            exit 1
+          fi
+          echo "Success: Output file 'log.rtcm.json.test' is writeable."
+          ls -l log.rtcm.json.test
+
+          echo "[3/4] Verifying the 'rtcm32json' tool is functional..."
+          swift rtcm32json --help > /dev/null 2>&1
+          if [ $? -ne 0 ]; then
+            echo "Error: The 'swift rtcm32json' command failed to respond."
+            exit 1
+          fi
+          echo "Success: 'swift rtcm32json' tool appears to be working."
+
+          echo "[4/4] Attempting to connect, log in, and stream data..."
+          # FIX 1: Changed -vv to the correct --verbose flag
+          timeout 10s swift ntripping --verbose \
             --username "${{ env.NTRIP_USERNAME }}" \
             --password "${{ env.NTRIP_PASSWORD }}" \
             --url https://eu.l1l2.skylark.swiftnav.com:2102/SSR-integrity \
             --lat 52.149 \
             --lon 13.096 | swift rtcm32json > log.rtcm.json.test
-          continue-on-error:true 
+        # FIX 2: Corrected the indentation of this line
+        continue-on-error: true
+
+        
           
 
       - name: Upload Test Log File
