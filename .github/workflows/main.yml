@@ -1,7 +1,5 @@
-# A name for this test workflow
 name: Test Swift Tools and NTRIP Stream
 
-# Allow manual triggering of this workflow
 on:
   workflow_dispatch:
   push:
@@ -15,9 +13,9 @@ jobs:
       NTRIP_USERNAME: ${{ secrets.NTRIP_USERNAME }}
       NTRIP_PASSWORD: ${{ secrets.NTRIP_PASSWORD }}
       
-      # IMPORTANT: Replace this placeholder with the actual URL from your GitHub Release!
+      # IMPORTANT: Make sure these two values are still correct!
       SWIFT_TOOLS_URL: "https://github.com/shahrzadshariati/Convert-Stream-RTCM-to-JSON/releases/download/v1.0.0-tools/swift-cli-v0.20.0-x86_64-unknown-linux-musl.tar.gz"
-      EXPECTED_FILE_SIZE: 44397837 
+      EXPECTED_FILE_SIZE: 44397837 
 
     steps:
       - name: Check out repository
@@ -40,21 +38,18 @@ jobs:
           echo "$HOME/swift-tools" >> $GITHUB_PATH
           echo "Tools are ready."
 
-        - name: Run a 10-second Test Stream
-          # Add this env block to provide the authentication token
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          run: |
-            echo "### Starting a 10-second test stream... ###"
-            timeout 10s swift ntripping \
+      - name: Run a 10-second Test Stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "### Starting a 10-second test stream... ###"
+          timeout 10s swift ntripping \
             --username "${{ env.NTRIP_USERNAME }}" \
             --password "${{ env.NTRIP_PASSWORD }}" \
             --url https://eu.l1l2.skylark.swiftnav.com:2102/SSR-integrity \
             --lat 52.149 \
             --lon 13.096 | swift rtcm32json > log.rtcm.json.test
-          continue-on-error: true
-
-        
+        continue-on-error: true
 
       - name: Upload Test Log File
         uses: actions/upload-artifact@v4
