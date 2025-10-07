@@ -1,0 +1,64 @@
+# A name for this test workflow
+name: Test Swift Tools and NTRIP Stream
+
+# Allow manual triggering of this workflow
+on:
+  workflow_dispatch:
+
+jobs:
+  test-streaming-job:
+    runs-on: ubuntu-latest
+    env:
+      # We will set these secrets in the next steps
+      NTRIP_USERNAME: ${{ secrets.NTRIP_USERNAME }}
+      NTRIP_PASSWORD: ${{ secrets.NTRIP_PASSWORD }}
+      # IMPORTANT: Replace these with the actual URL and size of your tools
+      SWIFT_TOOLS_URL: "https://path.to.your/swift-tools.tar.gz"
+      EXPECTED_FILE_SIZE: 12345678 # Replace with actual file size in bytes
+
+    steps:
+      # Step A: Get repository code
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Step B: Download, verify, and install Swift tools
+      - name: Setup Swift Tools
+        run: |
+          echo "### Downloading and installing Swift Tools... ###"
+          curl -L -o swift-tools.tar.gz ${{ env.SWIFT_TOOLS_URL }}
+          
+          # Basic size check to catch corrupted downloads
+          ACTUAL_SIZE=$(wc -c < swift-tools.tar.gz)
+          if [ "$ACTUAL_SIZE" -ne "${{ env.EXPECTED_FILE_SIZE }}" ]; then
+            echo "Error: Downloaded file size is incorrect. Expected ${{ env.EXPECTED_FILE_SIZE }}, got $ACTUAL_SIZE."
+            exit 1
+          fi
+          
+          # Create a directory and extract the tools
+          mkdir -p $HOME/swift-tools
+          tar -xzf swift-tools.tar.gz -C $HOME/swift-tools
+          
+          # Add the tools to the PATH so we can call them directly
+          echo "$HOME/swift-tools" >> $GITHUB_PATH
+          echo "Tools are ready."
+
+      # Step C: Run a short 10-second test stream
+      - name: Run a 10-second Test Stream
+        run: |
+          echo "### Starting a 10-second test stream... ###"
+          timeout 10s swift-ntripping \
+            --username ${{ env.NTRIP_USERNAME }} \
+            --password ${{ env.NTRIP_PASSWORD }} \
+            --url https://eu.l1l2.skylark.swiftnav.com:2102/SSR-integrity \
+            --lat 52.149 \
+            --lon 13.096 | swift-rtcm32json > log.rtcm.json.test
+        # We use 'continue-on-error' so the next step runs even if this fails,
+        # allowing us to see any partial log file that was created.
+        continue-on-error: true
+
+      # Step D: Upload the resulting test file as an artifact
+      - name: Upload Test Log File
+        uses: actions/upload-artifact@v4
+        with:
+          name: ntrip-test-log
+          path: log.rtcm.json.test
