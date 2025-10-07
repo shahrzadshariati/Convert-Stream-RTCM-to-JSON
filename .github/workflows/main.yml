@@ -44,14 +44,16 @@ jobs:
 
       # Step C: Run a short 10-second test stream
       - name: Run a 10-second Test Stream
+        # NEW CORRECTED COMMANDS
         run: |
-          echo "### Starting a 10-second test stream... ###"
-          timeout 10s swift-ntripping \
-            --username ${{ env.NTRIP_USERNAME }} \
-            --password ${{ env.NTRIP_PASSWORD }} \
-            --url https://eu.l1l2.skylark.swiftnav.com:2102/SSR-integrity \
-            --lat 52.149 \
-            --lon 13.096 | swift-rtcm32json > log.rtcm.json.test
+        echo "### Starting a 10-second test stream... ###"
+        # Note the space instead of a hyphen in the commands
+        timeout 10s swift ntripping \
+        --username ${{ env.NTRIP_USERNAME }} \
+        --password ${{ env.NTRIP_PASSWORD }} \
+        --url https://eu.l1l2.skylark.swiftnav.com:2102/SSR-integrity \
+        --lat 52.149 \
+        --lon 13.096 | swift rtcm32json > log.rtcm.json.test
         # We use 'continue-on-error' so the next step runs even if this fails,
         # allowing us to see any partial log file that was created.
         continue-on-error: true
