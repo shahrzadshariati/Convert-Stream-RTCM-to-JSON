@@ -16,8 +16,8 @@ jobs:
       NTRIP_PASSWORD: ${{ secrets.NTRIP_PASSWORD }}
       
       # IMPORTANT: Replace this placeholder with the actual URL from your GitHub Release!
-      SWIFT_TOOLS_URL: "https://github.com/your-username/your-repo/releases/download/v1.0.0-tools/swift-cli-v0.20.0-x86_64-unknown-linux-gnu.tar.gz"
-      EXPECTED_FILE_SIZE: 10702553
+      SWIFT_TOOLS_URL: "https://github.com/shahrzadshariati/Convert-Stream-RTCM-to-JSON/releases/download/v1.0.0-tools/swift-cli-v0.20.0-x86_64-unknown-linux-musl.tar.gz"
+      EXPECTED_FILE_SIZE: 43240924
 
     steps:
       - name: Check out repository
